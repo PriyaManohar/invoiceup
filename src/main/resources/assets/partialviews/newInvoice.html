@@ -1,0 +1,197 @@
+<div class="infowrapper section">
+<h5>Include all the necessary information</h5>
+<p>Please use the right procedure codes and complete all necessary fields.</p>
+<p>You can search for procedure codes using our code search tool available via the link below.</p>
+<a class="search waves-effect waves-light btn ">Search Codes</a>
+</div>
+
+<div class="formwrapper">
+
+  <p style="color:white;">Step 1  Enter Clinician Details</p>
+
+<div class="section sectionwrapper">
+<div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s6">
+          <input id="first_name_prof" type="text" class="validate">
+          <label for="first_name_prof">First Name</label>
+        </div>
+        <div class="input-field col s6">
+          <input id="last_name_prof" type="text" class="validate">
+          <label for="last_name_prof">Last Name</label>
+        </div>
+      </div>
+      <div class="row">
+          <div class="input-field col s6">
+          <select id="prof_title">
+              <option value="" disabled selected>Select Title</option>
+              <option value="1">Dr</option>
+              <option value="2">Mr</option>
+              <option value="3">Mrs</option>
+              <option value="4">Ms</option>
+              <option value="5">Miss</option>
+          </select>
+
+          </div>
+
+            <div class="input-field col s6">
+              <input id="designation" type="text" class="validate">
+              <label for="designation">Designation</label>
+            </div>
+     </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="prof_email" type="email" class="validate">
+          <label for="prof_email">Email</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <input id="gmc_no" type="text" class="validate">
+          <label for="gmc_no">GMC Registration Number</label>
+        </div>
+        <div class="input-field col s6">
+          <input id="mobile_no" type="tel" class="validate">
+          <label for="mobile_no">Mobile Number</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="address_1_prof" type="text" class="validate">
+          <label for="address_1_prof">Address First Line</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="address_2_prof" type="text" class="validate">
+          <label for="address_2_prof">Address Second Line</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="city_prof" type="text" class="validate">
+          <label for="city_prof">City/Town</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="postcode_prof" type="text" class="validate">
+          <label for="postcode_prof">Postcode</label>
+        </div>
+      </div>
+
+       <a id="forward_step2" class="waves-effect waves-light btn ">Next Step</a>
+    </form>
+  </div>
+</div>
+</div>
+
+
+<script>
+
+$('#forward_step2').click(function()
+{
+  storeClinicianDetails();
+  changePage('step2');
+});
+
+function storeClinicianDetails(){
+
+      var fname = $("#first_name_prof").val();
+      var lname = $("#last_name_prof").val();
+      var title = $( "#prof_title option:selected" ).text();
+      var designation = $("#designation").val();
+      var email = $("#prof_email").val();
+      var gmcNo =  $("#gmc_no").val();
+      var mobile_no = $("#mobile_no").val();
+      var address1 = $("#address_1_prof").val();
+      var address2 = $("#address_2_prof").val();
+      var city = $("#city_prof").val();
+      var postcode = $("#postcode_prof").val();
+
+      sessionStorage.setItem("doc_firstname", fname);
+      sessionStorage.setItem("doc_lastname", lname);
+      sessionStorage.setItem("doc_title", title);
+      sessionStorage.setItem("doc_designation", designation);
+      sessionStorage.setItem("doc_email", email);
+      sessionStorage.setItem("doc_gmcno", gmcNo);
+      sessionStorage.setItem("doc_mobno", mobile_no);
+      sessionStorage.setItem("doc_add1", address1);
+      sessionStorage.setItem("doc_add2", address2);
+      sessionStorage.setItem("doc_city", city);
+      sessionStorage.setItem("doc_postcode", postcode);
+
+      //var lastnam= sessionStorage.getItem("doc_lastname");
+      //console.log(lastnam);
+
+}
+
+$(function() {
+
+$(".button-collapse").sideNav();
+$('select').material_select();
+ $('.collapsible').collapsible({
+    accordion: false,
+    fillSpace: true // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+  });
+
+   if (sessionStorage.length !== 0) {
+
+     setPage1Content();
+
+   }
+
+});
+
+function setPage1Content(){
+
+  var f_name = sessionStorage.getItem("doc_firstname");
+  var l_name =  sessionStorage.getItem("doc_lastname");
+  var title = sessionStorage.getItem("doc_title");
+  var desg = sessionStorage.getItem("doc_designation");
+  var d_email = sessionStorage.getItem("doc_email");
+  var gmcno = sessionStorage.getItem("doc_gmcno");
+  var mobno = sessionStorage.getItem("doc_mobno");
+  var address1 = sessionStorage.getItem("doc_add1");
+  var address2 = sessionStorage.getItem("doc_add2");
+  var city = sessionStorage.getItem("doc_city");
+  var pcode = sessionStorage.getItem("doc_postcode");
+
+  $("#first_name_prof").val(f_name);
+  $("#last_name_prof").val(l_name);
+
+  var titleindex = getIndex('prof_title',title);
+  console.log("Selected index" + titleindex);
+  $("#prof_title").val(titleindex);
+  $("#prof_title").material_select();
+  //$( "#prof_title option:selected" ).text();
+  $("#designation").val(desg);
+  $("#prof_email").val(d_email);
+  $("#gmc_no").val(gmcno);
+  $("#mobile_no").val(mobno);
+  $("#address_1_prof").val(address1);
+  $("#address_2_prof").val(address2);
+  $("#city_prof").val(city);
+  $("#postcode_prof").val(pcode);
+
+  $("#first_name_prof").parent().find("label").addClass("active");
+  $("#last_name_prof").parent().find("label").addClass("active");
+  $("#prof_title").parent().find("label").addClass("active");
+  $("#designation").parent().find("label").addClass("active");
+  $("#prof_email").parent().find("label").addClass("active");
+  $("#gmc_no").parent().find("label").addClass("active");
+  $("#mobile_no").parent().find("label").addClass("active");
+  $("#address_1_prof").parent().find("label").addClass("active");
+  $("#address_2_prof").parent().find("label").addClass("active");
+  $("#city_prof").parent().find("label").addClass("active");
+  $("#postcode_prof").parent().find("label").addClass("active");
+}
+
+
+</script>
+
+<!-- <script type="text/javascript" src="script/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="script/materialize.js"></script>
+<script type="text/javascript" src="script/matScript.js"></script>
+<script type="text/javascript" src="script/pageController.js"></script> -->

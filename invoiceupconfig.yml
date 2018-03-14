@@ -1,0 +1,8 @@
+server:
+  type: simple
+  rootPath: /api/*
+  applicationContextPath: /
+
+mongoHost : localhost
+mongoPort : 27017
+mongoDB : providersdb

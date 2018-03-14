@@ -1,0 +1,470 @@
+
+
+<div class="formwrapper">
+
+  <p style="color:white;">Step 3  Treatment Details</p>
+
+<div class="section sectionwrapper">
+
+  <div class="row">
+      <form class="col s12">
+
+        <div class="row">
+
+            <div class="input-field col s6">
+              <select id="select_provider1">
+                  <option value="" disabled selected>Select Provider</option>
+                  <option value="1">Axa</option>
+                  <option value="2">Bupa</option>
+              </select>
+            </div>
+
+            <div class="input-field col s6">
+              <select id="select_profession">
+                  <option value="" disabled selected>You are a/an</option>
+                  <option value="1">Anaesthetist</option>
+                  <option value="2">Surgeon</option>
+              </select>
+            </div>
+       </div>
+
+       <div class="row">
+         <div class="input-field col s6">
+           <input id="date_of_procedure" type="text" class="validate">
+           <label for="date_of_procedure">Date of Procedure</label>
+         </div>
+         <div class="input-field col s6">
+           <input id="invoice_no" type="text" class="validate">
+           <label for="invoice_no">Invoice No</label>
+         </div>
+      </div>
+
+
+       <br>
+
+       <ul id ="codeTabe " class="collapsible" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header"><i class="material-icons prefix">search</i>Search by keyword or code
+
+               <a class="waves-effect waves-teal btn-flat right" id="clrSearchButton">Clear Search</a>
+              </div>
+
+            <div class="collapsible-body collapsible-wrapper"><span>
+
+              <div class="col s12">
+                <div class="row">
+                  <div class="input-field col s6">
+                    <!-- <i class="material-icons prefix">search</i> -->
+                     <input id="search_text1" type="text" class="validate">
+                    <label for="search_text1">Search</label>
+                  </div class="col s6">
+
+
+                </div>
+              </div>
+
+
+
+                <table id="maintable" class="highlight" style='width: 100%'>
+                    <thead>
+                      <tr>
+                          <th>Code</th>
+                          <th>Description</th>
+                          <th>Anaesthetist Fees</th>
+                          <th>Surgeon Fees</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="table_body">
+
+                    </tbody>
+                  </table>
+
+              </span></div>
+          </li>
+
+        </ul>
+
+
+
+        <div class="row">
+         <div class="input-field col s6">
+           <input id="procedure_code" type="text" class="validate">
+           <label for="procedure_code">Procedure Code</label>
+         </div>
+
+       </div>
+
+       <div class="row">
+        <div class="input-field col s12">
+          <input id="proc_fees" type="text" class="validate">
+          <label for="proc_fees">Procedure Fees</label>
+        </div>
+      </div>
+
+
+      <a id="forward_step4" class="waves-effect waves-light btn ">Submit</a>
+      </form>
+
+    </div>
+ </div>
+</div>
+
+<script>
+
+var provider_name,prof,profIndex;
+var  main_table = $('#maintable');
+var baseUrl ="http://localhost:8080/api/webapi/invoiceup/";
+var doc = new jsPDF();
+
+$(function() {
+
+//$(".button-collapse").sideNav();
+$('select').material_select();
+$('.collapsible').collapsible({
+    accordion: false,
+    fillSpace: true // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+  });
+
+  if(localStorage.getItem("offlineOptIn")=== "true"){
+    let providerName = localStorage.getItem("offln_provider")
+    sendMessage({offline: true,off_provider: providerName});
+  }
+
+   if (sessionStorage['prov_name']) {
+
+    setPage3Content();
+
+  }
+
+});
+
+
+$("#select_provider1").change(function(){
+ var provider = document.getElementById("select_provider1");
+ provider_name = provider.options[provider.selectedIndex].text.toLowerCase();
+
+});
+
+$("#select_profession").change(function(){
+ var profession = document.getElementById("select_profession");
+ prof = profession.options[profession.selectedIndex].text.toLowerCase();
+ profIndex = profession.options[profession.selectedIndex].value;
+});
+
+
+$('#search_text1').keypress(function (event) {
+    var keypressed = event.keyCode || event.which;
+    if (keypressed == 13)
+    {
+        event.preventDefault();
+        searchString = $('#search_text1').val().toLowerCase();
+        //console.log(searchString);
+        var sTable = $('#maintable').DataTable();
+        sTable.destroy();
+        var url3 = baseUrl+'search?provider='+provider_name+'&&searchString='+searchString;
+
+
+        populateInvoiceTable(url3,main_table);
+        $('#clrSearchButton').show();
+    }
+});
+
+$( "#clrSearchButton" ).click(function() {
+  $('#search_text1').val("");
+  clearTable(main_table);
+});
+
+function clearTable(table){
+  var clrTable = table.DataTable();
+  clrTable.destroy();
+  table.hide();
+}
+
+function populateInvoiceTable(url,table){
+
+ fetch(url, {
+   method: 'get'
+ }).then(response => response.json())
+ .then(function(data) {
+
+   table.DataTable( {
+   responsive: true,
+   select: true,
+   data: data,
+   columns: [
+       { data: 'code' },
+       { data: 'description' },
+       { data: 'anaes_fees' },
+       { data: 'surg_fees' }
+   ]
+
+} );
+
+$('#maintable tbody').on('click', 'tr', function () {
+      //  var data = table.api.row( this ).data();
+    var code = $(this).find("td").eq(0).html();
+    var feeindex = parseInt(profIndex) + 1;
+    var fees =$(this).find("td").eq(feeindex).html();
+    $("#procedure_code").empty();
+    $("#proc_fees").empty();
+    $("#procedure_code").val(code);
+    $("#proc_fees").val(fees);
+    $("#procedure_code").parent().find("label").addClass("active");
+    $("#proc_fees").parent().find("label").addClass("active");
+    } );
+
+   table.show();
+   table.resize();
+   console.log(data);
+
+
+
+ }).catch(function(err) {
+   // Error :(
+ });
+
+}
+
+
+
+$('#forward_step4').click(function()
+{
+  alert("Im clicked");
+  storeProviderDetails();
+  changePage('step4');
+
+});
+
+
+  function storeProviderDetails(){
+
+      var prov = $( "#select_provider1 option:selected" ).text();
+      var profession = $( "#select_profession option:selected" ).text();
+      var dob_proc = $("#date_of_procedure").val();
+      var inv_no = $("#invoice_no").val();
+      var proc_code = $("#procedure_code").val();
+      var proc_fees = $("#proc_fees").val();
+
+      providerUrl = baseUrl+"provider?provider="+prov.toLowerCase();
+
+      fetch(providerUrl, {
+      	method: 'get'
+      }).then(response => response.json())
+      .then(function(data) {
+      console.log("Prov Data REceived "+data[0]);
+      var provider = data[0];
+      var prov_add1 = provider.address1;
+      var prov_add2 = provider.address2;
+      var prov_town = provider.town;
+      var prov_pcode = provider.postcode;
+
+      sessionStorage.setItem("prov_name", prov);
+      sessionStorage.setItem("profession", profession);
+      sessionStorage.setItem("dob_proc", dob_proc);
+      sessionStorage.setItem("inv_no", inv_no);
+      sessionStorage.setItem("proc_code", proc_code);
+      sessionStorage.setItem("proc_fees", proc_fees);
+      sessionStorage.setItem("prov_add1", prov_add1);
+      sessionStorage.setItem("prov_add2", prov_add2);
+      sessionStorage.setItem("prov_town", prov_town);
+      sessionStorage.setItem("prov_pcode", prov_pcode);
+      console.log("storing provider details") ;
+
+
+    }).catch(function(err) {
+      	console.log("Error :( "+err) ;
+      });
+
+    }
+
+    function setPage3Content(){
+
+      var providernam = sessionStorage.getItem("prov_name");
+      var prof = sessionStorage.getItem("profession");
+      var inv_no = sessionStorage.getItem("inv_no");
+      var dob_proc = sessionStorage.getItem("dob_proc");
+      var proc_code = sessionStorage.getItem("proc_code");
+      var proc_fees = sessionStorage.getItem("proc_fees");
+
+      //var prov = $( "#select_provider1 option:selected" ).text();
+      var provindex = getIndex('select_provider1',providernam);
+      console.log("Selected index" + provindex);
+      $("#select_provider1").val(provindex);
+      $("#select_provider1").material_select();
+      //var profession = $( "#select_profession option:selected" ).text();
+      var profindex = getIndex('select_profession',prof);
+      console.log("Selected index" + profindex);
+      $("#select_profession").val(profindex);
+      $("#select_profession").material_select();
+      $("#date_of_procedure").val(dob_proc);
+      $("#invoice_no").val(inv_no);
+      $("#procedure_code").val(proc_code);
+      $("#proc_fees").val(proc_fees);
+
+      $("#select_provider1").parent().find("label").addClass("active");
+      $("#select_profession").parent().find("label").addClass("active");
+      $("#date_of_procedure").parent().find("label").addClass("active");
+      $("#invoice_no").parent().find("label").addClass("active");
+      $("#procedure_code").parent().find("label").addClass("active");
+      $("#proc_fees").parent().find("label").addClass("active");
+
+    }
+
+//       function setClinicianDetails(){
+//
+//         var f_name = sessionStorage.getItem("doc_firstname");
+//         var l_name =  sessionStorage.getItem("doc_lastname");
+//         var title = sessionStorage.getItem("doc_title");
+//         var desg = sessionStorage.getItem("doc_designation");
+//         var d_email = sessionStorage.getItem("doc_email");
+//         var gmcno = sessionStorage.getItem("doc_gmcno");
+//         var mobno = sessionStorage.getItem("doc_mobno");
+//         var address1 = sessionStorage.getItem("doc_add1");
+//         var address2 = sessionStorage.getItem("doc_add2");
+//         var city = sessionStorage.getItem("doc_city");
+//         var pcode = sessionStorage.getItem("doc_postcode");
+//
+//         //console.log("retreiving session storage"+ pcode);
+//
+//         doc.setFontSize(11);
+//         doc.setFontType("normal");
+//         doc.text(title+" "+f_name+" "+l_name,135,35)
+//         doc.text(desg,135,40)
+//         doc.text(address1,135,50);
+//         doc.text(address2,135,55);
+//         doc.text(city,135,60);
+//         doc.text(pcode,135,65);
+//         doc.text(mobno,135,75);
+//         doc.text(d_email,135,80);
+//         doc.text(gmcno,135,85)
+//
+//         }
+//
+//         function setProviderDetails(){
+//
+//           var months = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+//                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
+//           var prov_name = sessionStorage.getItem("prov_name");
+//           var prov_add1 = sessionStorage.getItem("prov_add1");
+//           var prov_add2 = sessionStorage.getItem("prov_add2");
+//           var prov_town = sessionStorage.getItem("prov_town");
+//           var prov_pcode = sessionStorage.getItem("prov_pcode");
+//           var invoiceno = sessionStorage.getItem("inv_no");
+//           var curDate = new Date();
+//           var mon = curDate.getMonth();
+//           var invoiceDate = curDate.getDay()+" "+months[mon]+" "+curDate.getFullYear();
+//
+//           doc.text("To:",20,85);
+//           doc.text(prov_name,20,90);
+//           doc.text(prov_add1,20,95);
+//           doc.text(prov_add2,20,100);
+//           doc.text(prov_town,20,105);
+//           doc.text(prov_pcode,20,110);
+//           doc.text("Invoice Date : "+invoiceDate,20,120);
+//           doc.text("Invoice No : "+invoiceno,20,125);
+//
+//         }
+//
+//         function setPatientDetails(){
+//
+//           doc.setDrawColor(0);
+//           doc.setFillColor(237,233,227);
+//           doc.rect(20, 130, 180, 10, 'FD');
+//
+//           doc.rect(20, 140, 180, 60);
+//           doc.line(20, 150, 200, 150);
+//           doc.line(20, 160, 200, 160);
+//           //doc.line(20, 170, 200, 170);
+//
+//
+//           var pat_fname = sessionStorage.getItem("pat_firstname");
+//           var pat_lname = sessionStorage.getItem("pat_lastname");
+//           var pat_title = sessionStorage.getItem("pat_title");
+//           var policy_no = sessionStorage.getItem("policy_ref");
+//           var dob = sessionStorage.getItem("pat_dob");
+//           var pat_add1 = sessionStorage.getItem("pat_add1");
+//           var pat_add2 = sessionStorage.getItem("pat_add2");
+//           var pat_city = sessionStorage.getItem("pat_city");
+//           var pat_postcode = sessionStorage.getItem("pat_postcode");
+//
+//           doc.text("Patient Information",90,135);
+//           doc.text("Patient Name: "+pat_title+" "+pat_fname+" "+pat_lname,25,145);
+//           doc.text("Patient Policy Number: "+policy_no,25,155);
+//           doc.text("Patient Date of Birth: "+dob,100,155);
+//           doc.text("Patient Address ",25,165);
+//           doc.text(pat_add1,50,175);
+//           doc.text(pat_add2,50,180);
+//           doc.text(pat_city,50,185);
+//           doc.text(pat_postcode,50,190);
+//         }
+//
+//         function setTreatmentDetails() {
+//
+//           doc.setDrawColor(0);
+//           doc.setFillColor(237,233,227);
+//           doc.rect(20, 210, 180, 10, 'FD');
+//
+//           doc.rect(20, 220, 180, 30);
+//           //doc.line(20, 225, 200, 225);
+//           //doc.setFontSize(14);
+//           doc.text("Treatment Details",90,215);
+//
+//           var dob_proc = sessionStorage.getItem("dob_proc");
+//           var proc_code = sessionStorage.getItem("proc_code");
+//           var proc_fees = sessionStorage.getItem("proc_fees");
+//
+//           doc.setFontSize(12);
+//           doc.text("Date of Treatment: "+dob_proc,25,230);
+//           doc.text("Procedure Code: "+proc_code,25,235);
+//           doc.text("Procedure Fees: "+proc_fees,25,240);
+//
+//         }
+//
+//
+//
+//
+//   function generatePdf(){
+//
+//       doc.setTextColor(100);
+//       doc.setFont("helvetica");
+//       doc.setFontSize(22);
+//       doc.setFontType("bold");
+//       doc.text('INVOICE',20,20);
+//       doc.setLineWidth(0.5);
+//       doc.line(20, 25, 200, 25);
+//
+//       setClinicianDetails();
+//       setProviderDetails();
+//       setPatientDetails();
+//       setTreatmentDetails();
+//
+// console.log("generating pdf");
+//   //doc.output('dataurlnewwindow');
+//
+//   doc.save("inv.pdf");
+//   // var string = doc.output('datauristring');
+//   // var iframe = "<iframe width='100%' height='100%' src='" + string + "'></iframe>"
+//   // var x = window.open();
+//   // x.document.open();
+//   // x.document.write(iframe);
+//   // x.document.close();
+//   doc.output('dataurlnewwindow');
+//
+//   }
+
+
+</script>
+
+
+
+<!--
+<script type="text/javascript" src="script/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="script/jsPDF-1.3.2/dist/jspdf.min.js"></script>
+<script type="text/javascript" src="script/jsPDF-1.3.2/dist/jspdf.debug.js"></script> -->
+<!-- <script type="text/javascript" src="script/materialize.js"></script>
+<script type="text/javascript" src="script/matScript.js"></script>
+<script type="text/javascript" src="script/invoice_search.js"></script>
+<script type="text/javascript" src="script/datatables.js"></script>
+<script type="text/javascript" src="script/pageController.js"></script>
+<script type="text/javascript" src="script/pdf.js"></script> -->

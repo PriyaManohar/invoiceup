@@ -1,0 +1,89 @@
+<blockquote>
+     This is an example quotation that uses the blockquote tag.
+
+     who is it for
+
+      <p>{{ message }}</p>
+   </blockquote>
+
+   <!--
+   // function checkOfflineStatus() {
+   //
+   //  return new Promise((resolve, reject) => {
+   //
+   //   var db = idb.open('invoiceup', 1, function(upgradeDb) {
+   //     if (!upgradeDb.objectStoreNames.contains('providerContact')) {
+   //       offlineData = false;
+   //       console.log("offline options not setup");
+   //     }else{
+   //       offlineData = true;
+   //     }
+   //   }).then(function(db){
+   //
+   //       if(offlineData){
+   //         var tx = db.transaction('providerContact','readwrite');
+   //         var store = tx.objectStore('providerContact');
+   //         var items = store.getAll();
+   //         offlineProvider = items[0].name;
+   //         console.log("Offline provider = "+offlineProvider);
+   //        }
+   //      }).then(function(){
+   //           if(!offlineData){
+   //              var DBDeleteRequest = indexedDB.deleteDatabase("invoiceup");
+   //
+   //               DBDeleteRequest.onerror = function(event) {
+   //                 console.log("Error deleting database.");
+   //               };
+   //
+   //               DBDeleteRequest.onsuccess = function(event) {
+   //                 console.log("Database deleted successfully");
+   //               //  console.log(event.result); // should be undefined
+   //               };
+   //             }
+   //         }).catch(function(Err){
+   //           console.log("Error while checking Offlinedb "+Err);
+   //         });
+   //
+   //
+   //
+   //   });
+   // } -->
+
+   <!--
+   //  function createDB(provider) {
+   //    return new Promise((resolve, reject) => {
+   //     idb.open('offlinedb', 1, function(upgradeDb) {
+   //     console.log('making offline object store');
+   //     if (!upgradeDb.objectStoreNames.contains("offlineList")) {
+   //        dbstore = upgradeDb.createObjectStore("offlineList", { keyPath: "name" });
+   //      }
+   //     }).then(function(db){
+   //     var tx = db.transaction('offlineList', 'readwrite');
+   //     var store = tx.objectStore('offlineList');
+   //     var item = {
+   //       name: provider,
+   //       created: new Date().getTime()
+   //     };
+   //     store.add(item);
+   //     return tx.complete;
+   //   }).then(function() {
+   //     console.log('added to the store list!');
+   //   });
+   //  });
+   // } -->
+
+   <!-- // .then(function(){
+   //   if(offlineData){
+   //
+   //     idb.open('invoiceup', 1).then(function(db) {
+   //     var tx = db.transaction(['providerContact'], 'readonly');
+   //     var store = tx.objectStore('providerContact');
+   //     return store.getAll();
+   //   }).then(function(items) {
+   //      offlineProvider = items[0].name;
+   //      console.log("Offline provider = "+offlineProvider);
+   //   });
+   //
+   //   }
+   // });
+   //getOfflineProviderName(); -->

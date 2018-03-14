@@ -1,0 +1,174 @@
+
+
+<div class="formwrapper">
+
+  <p style="color:white;">Step 2  Enter Patient Details</p>
+
+<div class="section sectionwrapper">
+
+  <div class="row">
+      <form class="col s12">
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="patientfirst_name" type="text" class="validate">
+            <label for="patientfirst_name">First Name</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="patientlast_name" type="text" class="validate">
+            <label for="patientlast_name">Last Name</label>
+          </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s6">
+            <select id="patient_title">
+                <option value="" disabled selected>Select Title</option>
+                <option value="1">Dr</option>
+                <option value="2">Mr</option>
+                <option value="3">Mrs</option>
+                <option value="4">Ms</option>
+                <option value="5">Miss</option>
+            </select>
+
+            </div>
+
+              <div class="input-field col s6">
+                <input id="policy_no" type="text" class="validate">
+                <label for="policy_no">Health Insurance Policy Number</label>
+              </div>
+       </div>
+
+        <div class="row">
+          <div class="input-field col s12">
+            <input id="patient_dob" type="text" class="validate">
+            <label for="patient_dob">Date of Birth</label>
+          </div>
+       </div>
+
+        <div class="row">
+         <div class="input-field col s12">
+           <input id="patient_address1" type="text" class="validate">
+           <label for="patient_address1">Address Line 1</label>
+         </div>
+       </div>
+
+       <div class="row">
+        <div class="input-field col s12">
+          <input id="patient_address2" type="text" class="validate">
+          <label for="patient_address2">Address Line 2</label>
+        </div>
+      </div>
+
+      <div class="row">
+       <div class="input-field col s6">
+         <input id="patient_city" type="text" class="validate">
+         <label for="patient_city">City/Town</label>
+       </div>
+       <div class="input-field col s6">
+         <input id="patient_postcode" type="text" class="validate">
+         <label for="patient_postcode">Postcode</label>
+       </div>
+      </div>
+
+
+      <a id="forward_step3" class="waves-effect waves-light btn ">Next Step</a>
+      </form>
+    </div>
+</div>
+</div>
+
+<script>
+
+$(function() {
+
+$(".button-collapse").sideNav();
+$('select').material_select();
+ $('.collapsible').collapsible({
+    accordion: false,
+    fillSpace: true // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+  });
+
+  if (sessionStorage['pat_firstname']) {
+
+    setPage2Content();
+
+  }
+
+});
+
+$('#forward_step3').click(function()
+{
+  storePatientDetails();
+  changePage('step3');
+});
+
+
+function  storePatientDetails(){
+
+        var fname = $("#patientfirst_name").val();
+        var lname = $("#patientlast_name").val();
+        var title = $( "#patient_title option:selected" ).text();
+        var policy_ref =  $("#policy_no").val();
+        var dob = $("#patient_dob").val();
+        var address1 = $("#patient_address1").val();
+        var address2 = $("#patient_address2").val();
+        var city = $("#patient_city").val();
+        var postcode = $("#patient_postcode").val();
+
+        sessionStorage.setItem("pat_firstname", fname);
+        sessionStorage.setItem("pat_lastname", lname);
+        sessionStorage.setItem("pat_title", title);
+        sessionStorage.setItem("policy_ref", policy_ref);
+        sessionStorage.setItem("pat_dob", dob);
+        sessionStorage.setItem("pat_add1", address1);
+        sessionStorage.setItem("pat_add2", address2);
+        sessionStorage.setItem("pat_city", city);
+        sessionStorage.setItem("pat_postcode", postcode);
+
+
+}
+
+  function setPage2Content(){
+
+    var pat_fname = sessionStorage.getItem("pat_firstname");
+    var pat_lname = sessionStorage.getItem("pat_lastname");
+    var pat_title = sessionStorage.getItem("pat_title");
+    var policy_no = sessionStorage.getItem("policy_ref");
+    var dob = sessionStorage.getItem("pat_dob");
+    var pat_add1 = sessionStorage.getItem("pat_add1");
+    var pat_add2 = sessionStorage.getItem("pat_add2");
+    var pat_city = sessionStorage.getItem("pat_city");
+    var pat_postcode = sessionStorage.getItem("pat_postcode");
+
+    $("#patientfirst_name").val(pat_fname);
+    $("#patientlast_name").val(pat_lname);
+    //$( "#patient_title option:selected" ).text();
+    var patindex = getIndex('patient_title',pat_title);
+    console.log("Selected index" + patindex);
+    $("#patient_title").val(patindex);
+    $("#patient_title").material_select();
+
+    $("#policy_no").val(policy_no);
+    $("#patient_dob").val(dob);
+    $("#patient_address1").val(pat_add1);
+    $("#patient_address2").val(pat_add2);
+    $("#patient_city").val(pat_city);
+    $("#patient_postcode").val(pat_postcode);
+
+    $("#patientfirst_name").parent().find("label").addClass("active");
+    $("#patientlast_name").parent().find("label").addClass("active");
+    $("#patient_title").parent().find("label").addClass("active");
+    $("#policy_no").parent().find("label").addClass("active");
+    $("#patient_dob").parent().find("label").addClass("active");
+    $("#patient_address1").parent().find("label").addClass("active");
+    $("#patient_address2").parent().find("label").addClass("active");
+    $("#patient_city").parent().find("label").addClass("active");
+    $("#patient_postcode").parent().find("label").addClass("active");
+
+  }
+
+</script>
+
+<!-- <script type="text/javascript" src="script/jquery-3.1.1.min.js"></script> -->
+<!-- <script type="text/javascript" src="script/materialize.js"></script>
+<script type="text/javascript" src="script/matScript.js"></script>
+<script type="text/javascript" src="script/pageController.js"></script> -->

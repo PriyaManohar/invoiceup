@@ -1,0 +1,280 @@
+<div class="formwrapper">
+
+  <p style="color:white;">Start typing in the search box or browse by chapter to find your desired code</p>
+
+  <div class="section sectionwrapper">
+           <div class="row">
+               <div class="input-field col s6">
+                 <select id="select_provider">
+                   <option value="" disabled selected>Select Provider</option>
+                   <option value="1">Axa</option>
+                   <option value="2">Bupa</option>
+                </select>
+            </div>
+
+          </div>
+  </div>
+
+  <div class="divider"></div>
+  <br>
+
+  <div class="section sectionwrapper">
+
+    <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">search</i>
+           <input id="search_text" type="text" class="validate">
+          <label for="search_text">Search by keyword or code</label>
+        </div>
+
+        <a class=" clearButton btn-floating waves-effect waves-light btn-medium right" id="clearSearchButton" ><i class="material-icons">clear</i></a>
+
+      </div>
+    </form>
+  </div>
+
+
+  <table id="search_table" style='width: 100%'>
+          <thead>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Anaesthetist Fees</th>
+                <th>Surgeon Fees</th>
+            </tr>
+          </thead>
+          <tbody id="search_table_body">
+
+          </tbody>
+        </table>
+
+    </div>
+
+
+  <div class="divider"></div>
+  <br>
+
+<div class="section sectionwrapper">
+    <p> Please browse by chapter to select the code.</p>
+       <div class="row">
+             <div class="input-field col s6">
+               <select id="select_chapter_search">
+                 <option value="" disabled selected>Select Chapter</option>
+                 <option value="1">1 Simple investigations and procedures</option>
+                 <option value="2">2 Brain, cranium and other intracranial organs</option>
+                 <option value="3">3 Spine, spinal cord and peripheral nerves</option>
+                 <option value="4">4 Eye and orbital contents</option>
+                 <option value="5">5 Ear, nose and throat</option>
+                 <option value="6">6 Face,mouth,salivary and thyroid</option>
+                 <option value="7">7 Breast</option>
+                 <option value="8">8 Thorax and intra-thoraic organs</option>
+                 <option value="9">9 Vascular system</option>
+                 <option value="10">10 Endoscopic gastrointestinal tract procedures</option>
+                 <option value="11">11 Abdomen (excluding urinary and reproductive organs)</option>
+                 <option value="12">12 Urinary system and male reproductive organs</option>
+                 <option value="13">13 Pregnancy and confinement</option>
+                 <option value="14">14 Female reproductive organs</option>
+                 <option value="15">15 Skin and subcutaneous tissue</option>
+                 <option value="16">16 Bones, joints and connective tissue/tendon muscle</option>
+                 <option value="17">17 Interventional radiology</option>
+                 <option value="18">18 Chemotherapy</option>
+                 <option value="19">19 Haematology</option>
+                 <option value="20">20 Radiotherapy</option>
+              </select>
+            </div>
+
+            <div class="col s6">
+              <a class=" clearButton btn-floating waves-effect waves-light btn-medium right" id="clearTableButton" ><i class="material-icons">clear</i></a>
+            </div>
+          </div>
+
+
+          <table id="codes_table" style='width: 100%'>
+                  <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>Anaesthetist Fees</th>
+                        <th>Surgeon Fees</th>
+                    </tr>
+                  </thead>
+                  <tbody id="codes_table_body">
+
+                  </tbody>
+                </table>
+
+
+</div>
+
+</div>
+
+
+        <!-- <script type="text/javascript" src="./script/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="./script/materialize.js"></script>
+        <script type="text/javascript" src="./script/matScript.js"></script>
+        <script type="text/javascript" src="./script/datatables.js"></script> -->
+        <!-- <script type="text/javascript" src="script/pageController.js"></script> -->
+
+<script>
+
+
+
+var codes_table =  $('#codes_table');
+var  search_table = $('#search_table');
+var prov_name,searchString,chap_no;
+var baseUrl ="http://localhost:8080/api/webapi/invoiceup/";
+
+$(function() {
+
+//$(".button-collapse").sideNav();
+$('select').material_select();
+$('.collapsible').collapsible({
+    accordion: false,
+    fillSpace: true // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+  });
+
+  if(localStorage.getItem("offlineOptIn")=== "true"){
+    let providerName = localStorage.getItem("offln_provider")
+    sendMessage({offline: true,off_provider: providerName});
+  }
+
+ codes_table.hide();
+ search_table.hide();
+ //main_table.hide();
+ $('#clearSearchButton').hide();
+ $('#clearTableButton').hide();
+ //$('#clrSearchButton').hide();
+
+
+
+
+
+
+ // $(window).bind('resize', function () {
+ // codes_table.fnAdjustColumnSizing();
+ // search_table.fnAdjustColumnSizing();
+ //  } );
+
+});
+
+$( "#search_text" ).focus(function() {
+  var prov = $( "#select_provider option:selected" ).text();
+  console.log(prov);
+  if (prov === "Select Provider")
+      alert( "Please select the provider first !" );
+  $( "#search_text" ).off( "focus" );
+});
+
+// $( "#select_chapter_search" ).focus(function() {
+//     var pro = $( "#select_provider option:selected" ).text();
+//     if (pro === "Select Provider")
+//       alert( "Please select the provider first !" );
+//   $( "#select_chapter_search" ).off( "focus" );
+// });
+
+
+$("#select_provider").change(function(){
+ var provider = document.getElementById("select_provider");
+ prov_name = provider.options[provider.selectedIndex].text.toLowerCase();
+});
+
+$('#search_text').keypress(function (event) {
+    var keypressed = event.keyCode || event.which;
+    if (keypressed == 13)
+    {
+        event.preventDefault();
+        searchString = $('#search_text').val().toLowerCase();
+        //console.log(searchString);
+        var sTable = $('#search_table').DataTable();
+        sTable.destroy();
+        var url2 = baseUrl+'search?provider='+prov_name+'&&searchString='+searchString;
+
+
+        populateTable(url2,search_table);
+        $('#clearSearchButton').show();
+
+
+    }
+});
+
+$("#select_chapter_search").change(function(){
+
+  var pro = $( "#select_provider option:selected" ).text();
+  if (pro === "Select Provider"){
+      alert( "Please select the provider first !" );
+      // $("#select_chapter_search").val("").change();
+      // $( "#select_chapter_search" ).off( "focus" );
+
+  }
+  else {
+
+       var chapter = document.getElementById("select_chapter_search");
+       chap_no = chapter.options[chapter.selectedIndex].value;
+       console.log(chap_no);
+       var myTable = $('#codes_table').DataTable();
+       myTable.destroy();
+       var url1 = baseUrl+'chaptercodes?provider='+prov_name+'&&chapter='+chap_no;
+
+       //To do.....check if prov_name is valid
+       populateTable(url1,codes_table);
+        $('#clearTableButton').show();
+
+}
+});
+
+
+ function populateTable(url,table){
+
+  fetch(url, {
+  	method: 'get'
+  }).then(response => response.json())
+  .then(function(data) {
+
+    table.DataTable( {
+    responsive: true,
+    data: data,
+    columns: [
+        { data: 'code' },
+        { data: 'description' },
+        { data: 'anaes_fees' },
+        { data: 'surg_fees' }
+    ]
+} );
+
+    table.show();
+    table.resize();
+    console.log(data);
+
+   //  if (typeof table !== "undefined")
+   // table.columns.adjust().responsive.recalc();
+
+  }).catch(function(err) {
+  	// Error :(
+  });
+
+}
+
+      function clearTable(table){
+        var clrTable = table.DataTable();
+        clrTable.destroy();
+        table.hide();
+
+      }
+
+
+      $( "#clearSearchButton" ).click(function() {
+        $('#search_text').val("");
+        clearTable(search_table);
+      });
+
+      $( "#clearTableButton" ).click(function() {
+        clearTable(codes_table);
+      });
+
+
+
+
+
+</script>

@@ -1,0 +1,228 @@
+
+<br>
+<br>
+<br>
+<div class = "valign-wrapper">
+
+ <div class="row">
+
+     <div class="col s4 center  pagewrapper">
+        <i class="large material-icons theme">trending_up</i>
+       <h5 class="center-align"><p class="flow-text">Speeds up Invoicing</p></h5>
+       <br>
+       <h6><p class="center-align ">With just a few steps invoices can be generated on the go within minutes. </p></h6>
+     </div>
+
+     <div class="col s4 center  pagewrapper">
+        <i class="large material-icons theme">important_devices</i>
+       <h5 class="center-align"><p class="flow-text">Access anywhere from any device</p></h5>
+       <br>
+      <h6>  <p class="center-align ">The app can be accessed from any internet accessible device and after initial use can also be used offline </p></h6>
+      <br>
+      <br>
+      <a class="waves-effect waves-light btn-large modal-trigger" href="#modal1" id="optInBtn">Choose offline options</a>
+     </div>
+
+     <div class="col s4 center  pagewrapper">
+      <i class="large material-icons theme">all_inclusive</i>
+       <h5 class="center-align"><p class="flow-text">One stop solution</p></h5>
+       <br>
+      <h6> <p class="center-align ">With access to procedure codes from most leading insurance providers, no more logging to different websites</p></h6>
+     </div>
+
+   </div>
+   <br>
+   <br>
+</div>
+    <!-- <a class="waves-effect waves-light btn-large left newInvoice" id="startinvoice">Create Invoice</a> -->
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal bottom-sheet">
+      <div class="modal-content">
+        <h4>Choose offline option</h4>
+        <p>One of your most frequently used provider can be selected for offline access</p>
+
+        <div class="section">
+                 <div class="row">
+                     <div class="input-field col s6">
+                       <select id="select_offlineprovider">
+                         <option value="" disabled selected>Select Provider</option>
+                         <option value="1">Axa</option>
+                         <option value="2">Bupa</option>
+                      </select>
+                  </div>
+
+                </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+      </div>
+    </div>
+
+  <script>
+
+        var baseUrl ="http://localhost:8080/api/webapi/invoiceup/";
+        var prov_name1;
+        var dbPromise;
+        var codesArray = new Array();
+
+
+       $(document).ready(function(){
+         // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+         $('.modal').modal();
+         $('select').material_select();
+         if(localStorage.offlineOptIn=="true"){
+              $("#optInBtn").hide();
+         }
+       });
+
+       $("#select_offlineprovider").change(function(){
+        var provider = document.getElementById("select_offlineprovider");
+        prov_name1 = provider.options[provider.selectedIndex].text.toLowerCase();
+        createDB().then(fetchData()).then(fetchProvData()).
+        then(sendMessage({offline: true,off_provider: prov_name1}));
+        //fetchData();
+        //addData();
+        $("#optInBtn").hide();
+        localStorage.setItem("offlineOptIn", "true");
+        localStorage.setItem("offln_provider", prov_name1);
+
+       });
+
+       function createDB() {
+
+         return new Promise((resolve, reject) => {
+
+         dbPromise = idb.open('invoiceup', 1, function(upgradeDb) {
+         console.log('making a new object store');
+         // if (!upgradeDb.objectStoreNames.contains('offlineprovider')) {
+         //  var offline_store = upgradeDb.createObjectStore('offlineprovider', {autoIncrement:true});
+         //  var data = new Object();
+         //  data.offline_prov = prov_name1;
+         //  offline_store.put(data);
+         // }
+         if (!upgradeDb.objectStoreNames.contains(prov_name1)) {
+          dbstore = upgradeDb.createObjectStore(prov_name1, { keyPath: "code" });
+         }
+         if (!upgradeDb.objectStoreNames.contains('providerContact')) {
+          dbstore = upgradeDb.createObjectStore('providerContact', { keyPath: "name" });
+         }
+         }).catch(function(err) {
+           // Error :(
+         });
+
+       });
+
+  }
+
+  function fetchData() {
+    return new Promise((resolve, reject) => {
+
+    var url= baseUrl+"providerdb?provider="+prov_name1;
+    clincode = new Object();
+
+    fetch(url, {
+      method: 'get'
+    }).then(response => response.json())
+    .then(function(data) {
+        addData(data);
+
+   }).catch(function(err) {
+   	console.log("Error while fetching offlinedb "+err);
+   });
+
+   //console.log(data);
+
+   });
+
+}
+
+function fetchProvData() {
+  return new Promise((resolve, reject) => {
+
+  var url= baseUrl+"provider?provider="+prov_name1;
+
+  fetch(url, {
+    method: 'get'
+  }).then(response => response.json())
+  .then(function(data) {
+
+    dbPromise.then(function(db) {
+
+        var tx = db.transaction('providerContact','readwrite');
+        var store = tx.objectStore('providerContact');
+
+        $.each(data,function(index,value){
+            //console.log("clincode");
+            store.put(value);
+          });
+
+        return tx.complete;
+
+    }).then(function() {
+        console.log('items updated in provofflinedb');
+      });
+
+
+ }).catch(function(err) {
+  console.log("Error while fetching provofflinedb "+err);
+ });
+
+ //console.log(data);
+
+ });
+
+}
+
+
+  function addData(codesArray){
+
+      return new Promise((resolve, reject) => {
+
+        dbPromise.then(function(db) {
+
+            var tx = db.transaction(prov_name1,'readwrite');
+            var store = tx.objectStore(prov_name1);
+
+            $.each(codesArray,function(index,value){
+                //console.log("clincode");
+                store.put(value);
+              });
+            return tx.complete;
+
+        }).then(function() {
+            console.log('items updated in offlinedb');
+          }).catch(function(err) {
+           console.log("Error while adding provofflinedb "+err);
+          });;
+
+    });
+
+  }
+
+  // function sendMessage(message) {
+  //   // This wraps the message posting/response in a promise, which will resolve if the response doesn't
+  //   // contain an error, and reject with the error if it does. If you'd prefer, it's possible to call
+  //   // controller.postMessage() and set up the onmessage handler independently of a promise, but this is
+  //   // a convenient wrapper.
+  //   return new Promise(function(resolve, reject) {
+  //     var messageChannel = new MessageChannel();
+  //     messageChannel.port1.onmessage = function(event) {
+  //       if (event.data.error) {
+  //         reject(event.data.error);
+  //       } else {
+  //         resolve(event.data);
+  //       }
+  //     };
+  //
+  //     // This sends the message data as well as transferring messageChannel.port2 to the service worker.
+  //     // The service worker can then use the transferred port to reply via postMessage(), which
+  //     // will in turn trigger the onmessage handler on messageChannel.port1.
+  //     // See https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
+  //     navigator.serviceWorker.controller.postMessage(message,
+  //       [messageChannel.port2]);
+  //   });
+  // }
+
+
+  </script>
