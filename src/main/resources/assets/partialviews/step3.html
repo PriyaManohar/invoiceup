@@ -44,9 +44,9 @@
 
        <ul id ="codeTabe " class="collapsible" data-collapsible="accordion">
           <li>
-            <div class="collapsible-header"><i class="material-icons prefix">search</i>Search by keyword or code
+            <div class="collapsible-header"><i class="material-icons prefix">search</i>Search by keyword/code
 
-               <a class="waves-effect waves-teal btn-flat right" id="clrSearchButton">Clear Search</a>
+               <a class="waves-effect waves-teal btn-flat right" id="clrSearchButton"><i class="material-icons">clear</i></a>
               </div>
 
             <div class="collapsible-body collapsible-wrapper"><span>
@@ -212,6 +212,9 @@ $('#maintable tbody').on('click', 'tr', function () {
     $("#proc_fees").val(fees);
     $("#procedure_code").parent().find("label").addClass("active");
     $("#proc_fees").parent().find("label").addClass("active");
+
+    $('#search_text1').val("");
+    clearTable(main_table);
     } );
 
    table.show();
